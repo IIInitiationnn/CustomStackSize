@@ -1,4 +1,5 @@
 name: CustomStackSize
-version: 0.1
+author: IIInitiationnn
 main: customstacksize.main
-api-version: 1.16.1
+version: 1.0
+api-version: 1.16
