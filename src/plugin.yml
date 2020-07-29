@@ -1,0 +1,4 @@
+name: CustomStackSize
+main: customstacksize.main
+version: 0.1
+api-version: 1.16.1

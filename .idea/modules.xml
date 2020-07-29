@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CustomStackSize.iml" filepath="$PROJECT_DIR$/CustomStackSize.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/CustomStackSize.iml" filepath="$PROJECT_DIR$/.idea/CustomStackSize.iml" />
     </modules>
   </component>
 </project>

@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="623fd4bb-5908-4cec-b6e7-84f602177c77" name="Default Changelist" comment="" />
+    <list default="true" id="2416323c-4422-4970-8721-4d854eaabfaa" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/plugin.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/spigot_1_16_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CustomStackSize/CustomStackSize.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/customstacksize/main.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Class" />
-      </list>
-    </option>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1fLqJjKoao88ASqmSj43zkxnke6" />
+  <component name="ProjectId" id="1fM2pAE72MBSE210fpS9MMMrupd" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -22,15 +26,6 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Downloads/spigot-1.16.1.jar!/" />
-    <property name="project.structure.last.edited" value="Libraries" />
-    <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
-  </component>
-  <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Coding Projects\CustomStackSize\src" />
-    </key>
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -49,22 +44,22 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="623fd4bb-5908-4cec-b6e7-84f602177c77" name="Default Changelist" comment="" />
-      <created>1596007650395</created>
+      <changelist id="2416323c-4422-4970-8721-4d854eaabfaa" name="Default Changelist" comment="" />
+      <created>1596013820901</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1596007650395</updated>
+      <updated>1596013820901</updated>
     </task>
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="680" y="272" key="FileChooserDialogImpl" timestamp="1596007835140">
+    <state x="822" y="419" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog" timestamp="1596013837867">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="680" y="272" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1596007835140" />
-    <state x="454" y="105" key="SettingsEditor" timestamp="1596007874921">
+    <state x="822" y="419" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1596013837867" />
+    <state x="670" y="354" key="com.intellij.ide.util.TipDialog" timestamp="1596013824222">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="454" y="105" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1596007874921" />
+    <state x="670" y="354" key="com.intellij.ide.util.TipDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1596013824222" />
   </component>
 </project>
