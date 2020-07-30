@@ -5,13 +5,16 @@ import net.minecraft.server.v1_16_R1.Items;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class main extends JavaPlugin implements Listener {
@@ -19,6 +22,8 @@ public class main extends JavaPlugin implements Listener {
     private Map<Material, Integer> originalStackSizes = new HashMap<>();;
 
     // TODO: IS THERE ANY OTHER PROPERTY EG IN INVENTORY WE CAN CHANGE TO MINIMISE THE FIDDLYNESS?
+    // TODO buckets and soups??? events
+    // TODO handle stacks on the ground?
 
     // STARTUP
     @java.lang.Override
@@ -34,9 +39,14 @@ public class main extends JavaPlugin implements Listener {
 
     // RELOAD
     public void reload() {
-        // TODO wipe all pre-set stuff eg. enderpearls = 64, then it's taken out of the config and reloaded
-        // all other values will change as necessary but enderpearls stays at 64. need to revert everything to default
-        // first. method here, revertStackSizes();
+        /*Player[] allPlayers = new Player[this.getServer().getOnlinePlayers().size()];
+        this.getServer().getOnlinePlayers().toArray(allPlayers);
+        for (Player a : allPlayers) {
+            a.recalculatePermissions();
+            this.log.info("Recalculating permissions for" + a.getName());
+        }*/
+        this.getCommand("customstacksize").setExecutor(new commands(this));
+        this.getCommand("customstacksize").setTabCompleter(new tabcomplete());
         this.resetAllStackSizes();
         this.reloadConfig();
         this.setupAllStackSizes();
@@ -45,6 +55,7 @@ public class main extends JavaPlugin implements Listener {
     // STOP
     @java.lang.Override
     public void onDisable() {
+        this.resetAllStackSizes();
         this.log.info("CustomStackSize has been disabled.");
     }
 
@@ -65,7 +76,7 @@ public class main extends JavaPlugin implements Listener {
             Item currentItem;
             try {
                 currentItem = (Item)Items.class.getField(eachItem).get((Object)null);
-            } catch (NoSuchFieldException error2) {
+            } catch (Exception error2) {
                 error2.printStackTrace();
                 continue;
             }
@@ -138,7 +149,7 @@ public class main extends JavaPlugin implements Listener {
             Item currentItem;
             try {
                 currentItem = (Item)Items.class.getField(eachItem).get((Object)null);
-            } catch (NoSuchFieldException error2) {
+            } catch (Exception error2) {
                 error2.printStackTrace();
                 continue;
             }
@@ -178,9 +189,36 @@ public class main extends JavaPlugin implements Listener {
         this.log.info(ChatColor.RED + "" + sender.getName() + ChatColor.DARK_RED + " was denied access to command.");
     }
 
+    // DISPLAY CUSTOM STACK SIZE OF ITEM: COMMAND "DISPLAY <ITEM>"
+    public boolean display(CommandSender sender, String item) {
+        Set<String> items;
+        try {
+            items = getConfig().getKeys(true);
+        } catch (NullPointerException error1) {
+            this.log.warning("Unable to retrieve information.");
+            return true;
+        }
+
+        for (String eachItem : items) {
+            if (!item.equalsIgnoreCase(eachItem)) {
+                continue;
+            }
+            Material currentMaterial = Material.matchMaterial(eachItem);
+            if (currentMaterial == null || !currentMaterial.isItem()) {
+                continue;
+            }
+            String stackSize = getConfig().getString(eachItem);
+
+            sender.sendMessage(ChatColor.GOLD + eachItem + ChatColor.WHITE + " has stack size: " + Integer.parseInt(stackSize));
+            return false;
+        }
+        sender.sendMessage(ChatColor.RED + item + " does not have a custom stack size.");
+        return true;
+    }
+
     // DISPLAY LIST OF CUSTOM STACK SIZES: COMMAND "LIST"
     public void list(CommandSender sender) {
-        sender.sendMessage(ChatColor.GOLD + "List of items with custom stack sizes:");
+        sender.sendMessage(ChatColor.GOLD + "All items with custom stack sizes:");
 
         Set<String> items;
         try {
@@ -213,12 +251,34 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
+
+
     // MODIFY ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "SET <ITEM> <SIZE>"
     // TODO
 
     // RESET ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "REVERT <ITEM>"
     // TODO
 
+    // EMPTY BUCKETS
+    @EventHandler
+    public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+        ItemStack filledBucket = event.getPlayer().getInventory().getItemInMainHand();
+        filledBucket.setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
 
+        if (filledBucket.getAmount() == 0) {
+            return;
+        }
+        String[] liquidType = (event.getBucket().toString().split("_"));
+        event.getBlock().setType(Objects.requireNonNull(Material.matchMaterial(liquidType[0])));
+        event.setCancelled(true);
 
+        ItemStack bucket = new ItemStack(Objects.requireNonNull(Material.matchMaterial("bucket")));
+        if (event.getPlayer().getInventory().firstEmpty() == -1) {
+            // inventory full
+            event.getPlayer().getWorld().dropItemNaturally(event.getPlayer().getLocation(), bucket);
+        } else {
+            // inventory has space
+            event.getPlayer().getInventory().addItem(bucket);
+        }
+    }
 }

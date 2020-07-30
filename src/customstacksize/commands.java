@@ -17,7 +17,7 @@ public class commands implements CommandExecutor {
         if (label.equalsIgnoreCase("customstacksize") || label.equalsIgnoreCase("css")) {
             // Display help prompt with available CSS commands
             if (args.length == 0) {
-                if (!sender.hasPermission("customstacksize.reload") && !sender.hasPermission("customstacksize.set") && !sender.hasPermission("customstacksize.list")) {
+                if (!sender.hasPermission("customstacksize.reload") && !sender.hasPermission("customstacksize.set") && !sender.hasPermission("customstacksize.view")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
                     return true;
@@ -27,15 +27,16 @@ public class commands implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "/" + label + " reload" + ChatColor.WHITE + ": reloads the config and plugin.");
                 }
                 if (sender.hasPermission("customstacksize.set")) {
-                    sender.sendMessage(ChatColor.GOLD + "/" + label + " set <item> <1-64>" + ChatColor.WHITE + ": sets the stack size for the item to an integer from 1 to 64.");
+                    sender.sendMessage(ChatColor.GOLD + "/" + label + " set <item> <size>" + ChatColor.WHITE + ": sets the stack size for the item to an integer from 1 to 64.");
                 }
-                if (sender.hasPermission("customstacksize.list")) {
-                    sender.sendMessage(ChatColor.GOLD + "/" + label + " list" + ChatColor.WHITE + ": displays all custom stack sizes.");
+                if (sender.hasPermission("customstacksize.view")) {
+                    sender.sendMessage(ChatColor.GOLD + "/" + label + " display <item>" + ChatColor.WHITE + ": displays custom stack size of specified item.");
+                    sender.sendMessage(ChatColor.GOLD + "/" + label + " list" + ChatColor.WHITE + ": displays all items with custom stack sizes.");
                 }
                 return true;
             }
 
-            // TODO: commands: displaysize <item> and revert <item>
+            // TODO: commands: revert <item>
 
             // RELOAD
             if (args[0].equalsIgnoreCase("reload")) {
@@ -63,20 +64,34 @@ public class commands implements CommandExecutor {
                 }
 
                 if (args.length != 3) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /" + label + " set <item> <1-64>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /" + label + " set <item> <size>");
                     return true;
                 }
 
                 sender.sendMessage(ChatColor.GOLD + "TO BE IMPLEMENTED");
-                // TODO process extra arguments for tabcomplete
                 // TODO need to load each item into memory (use setStackSize)
-                // TODO set up collective items that handle all the colours eg beds, glass
                 return false;
+            }
+
+            // DISPLAY
+            if (args[0].equalsIgnoreCase("display")) {
+                if (!sender.hasPermission("customstacksize.view")) {
+                    sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
+                    pluginInstance.permissionDenied(sender);
+                    return true;
+                }
+
+                if (args.length != 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /" + label + " display <item>");
+                    return true;
+                }
+
+                return pluginInstance.display(sender, args[1]);
             }
 
             // LIST
             if (args[0].equalsIgnoreCase("list")) {
-                if (!sender.hasPermission("customstacksize.list")) {
+                if (!sender.hasPermission("customstacksize.view")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
                     return true;
@@ -90,6 +105,8 @@ public class commands implements CommandExecutor {
                 pluginInstance.list(sender);
                 return false;
             }
+
+
             return false;
         }
 

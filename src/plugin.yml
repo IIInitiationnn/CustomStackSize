@@ -13,5 +13,5 @@ permissions:
     default: op
   customstacksize.set:
     default: op
-  customstacksize.list:
+  customstacksize.view:
     default: true
