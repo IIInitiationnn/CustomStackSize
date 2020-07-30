@@ -35,7 +35,7 @@ public class commands implements CommandExecutor {
                 return true;
             }
 
-            // TODO: commands: sizeof <item> and reset <item>
+            // TODO: commands: displaysize <item> and revert <item>
 
             // RELOAD
             if (args[0].equalsIgnoreCase("reload")) {

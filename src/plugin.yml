@@ -7,3 +7,11 @@ api-version: 1.16
 commands:
   customstacksize:
     aliases: [css]
+
+permissions:
+  customstacksize.reload:
+    default: op
+  customstacksize.set:
+    default: op
+  customstacksize.list:
+    default: true
