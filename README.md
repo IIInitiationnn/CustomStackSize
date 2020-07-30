@@ -5,7 +5,7 @@ Tested with Spigot 1.16.1.
 ### Overview
 - Provides functionality to edit items' stack sizes from 1 to 64.
 - Provides ability to view item stack size.
-- Commands can be called using `customstacksize` or its shorter alias `css`.
+- Commands can be called using `customstacksize` or its alias `css`.
 - Changes to the configuration file `config.yml` can be loaded using `css reload`.
 - Handles strange behaviour induced by certain interactions (emptying buckets, drinking stews).
 
