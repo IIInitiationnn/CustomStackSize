@@ -27,10 +27,10 @@ public class commands implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "/" + label + " reload" + ChatColor.WHITE + ": reloads the config and plugin.");
                 }
                 if (sender.hasPermission("customstacksize.set")) {
-                    sender.sendMessage(ChatColor.GOLD + "/" + label + " set <item> <size>" + ChatColor.WHITE + ": sets the stack size for the item to an integer from 1 to 64.");
+                    sender.sendMessage(ChatColor.GOLD + "/" + label + " set <item> <size>" + ChatColor.WHITE + ": sets the stack size of the item to an integer from 1 to 64 and adds it to the config.");
                 }
                 if (sender.hasPermission("customstacksize.view")) {
-                    sender.sendMessage(ChatColor.GOLD + "/" + label + " display <item>" + ChatColor.WHITE + ": displays custom stack size of specified item.");
+                    sender.sendMessage(ChatColor.GOLD + "/" + label + " display <item>" + ChatColor.WHITE + ": displays custom stack size of the item.");
                     sender.sendMessage(ChatColor.GOLD + "/" + label + " list" + ChatColor.WHITE + ": displays all items with custom stack sizes.");
                 }
                 return true;
