@@ -206,9 +206,16 @@ public class main extends JavaPlugin implements Listener {
             }
             String stackSize = getConfig().getString(eachItem);
 
-            sender.sendMessage(ChatColor.GOLD + eachItem + ChatColor.WHITE + " has stack size: " + Integer.parseInt(stackSize));
+            sender.sendMessage(ChatColor.GOLD + eachItem + ChatColor.WHITE + " has custom stack size: " + Integer.parseInt(stackSize));
             return false;
         }
+
+        Material material = Material.matchMaterial(item);
+        if (material != null) {
+            sender.sendMessage(ChatColor.GOLD + item + ChatColor.WHITE + " has Vanilla stack size: " + material.getMaxStackSize());
+            return false;
+        }
+
         sender.sendMessage(ChatColor.RED + item + " does not have a custom stack size.");
         return true;
     }
@@ -284,7 +291,7 @@ public class main extends JavaPlugin implements Listener {
 
     // SET COLLECTION OF COLOURED ITEMS TO THE SAME STACK SIZE
     public boolean setBulk(CommandSender sender, String category, String size) {
-        String[] colours = {"black", "blue", "brown", "cyan", "gray", "green", "light_blue", "light_gray", "lime", "magenta", "orange", "pink", "purple", "red", "white", "yellow",};
+        String[] colours = {"red", "lime", "pink", "blue", "cyan", "gray", "white", "black", "brown", "green", "orange", "purple", "yellow", "magenta", "light_blue", "light_gray"};
         int newSize;
         try {
             newSize = Integer.parseInt(size);

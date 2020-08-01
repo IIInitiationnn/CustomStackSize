@@ -83,7 +83,7 @@ public class commands implements CommandExecutor {
                     return true;
                 }
 
-                return pluginInstance.display(sender, args[1]);
+                return pluginInstance.display(sender, args[1].toUpperCase());
             }
 
             // LIST
