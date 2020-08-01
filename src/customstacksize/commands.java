@@ -17,7 +17,7 @@ public class commands implements CommandExecutor {
         if (label.equalsIgnoreCase("customstacksize") || label.equalsIgnoreCase("css")) {
             // Display help prompt with available CSS commands
             if (args.length == 0) {
-                if (!sender.hasPermission("customstacksize.reload") && !sender.hasPermission("customstacksize.set") && !sender.hasPermission("customstacksize.view")) {
+                if (!sender.hasPermission("customstacksize.reload") && !sender.hasPermission("customstacksize.modify") && !sender.hasPermission("customstacksize.view")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
                     return true;
@@ -26,7 +26,7 @@ public class commands implements CommandExecutor {
                 if (sender.hasPermission("customstacksize.reload")) {
                     sender.sendMessage(ChatColor.GOLD + "/" + label + " reload" + ChatColor.WHITE + ": reloads the config and plugin.");
                 }
-                if (sender.hasPermission("customstacksize.set")) {
+                if (sender.hasPermission("customstacksize.modify")) {
                     sender.sendMessage(ChatColor.GOLD + "/" + label + " set <item> <size>" + ChatColor.WHITE + ": sets the stack size of the item to an integer from 1 to 64 and adds it to the config.");
                 }
                 if (sender.hasPermission("customstacksize.view")) {
@@ -55,9 +55,8 @@ public class commands implements CommandExecutor {
             }
 
             // SET ITEM STACKSIZE
-            // TODO include original value in the message displaying ITEM: stack size changed from OLD to NEW
             if (args[0].equalsIgnoreCase("set")) {
-                if (!sender.hasPermission("customstacksize.set")) {
+                if (!sender.hasPermission("customstacksize.modify")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
                     return true;
@@ -68,9 +67,7 @@ public class commands implements CommandExecutor {
                     return true;
                 }
 
-                sender.sendMessage(ChatColor.GOLD + "TO BE IMPLEMENTED");
-                // TODO need to load each item into memory (use setStackSize)
-                return false;
+                return pluginInstance.setStackCommand(sender, args[1].toLowerCase(), args[2]);
             }
 
             // DISPLAY

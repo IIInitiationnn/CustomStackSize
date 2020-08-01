@@ -1,5 +1,6 @@
 package customstacksize;
 
+import net.minecraft.server.v1_16_R1.Item;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -12,14 +13,14 @@ import java.util.List;
 public class tabcomplete implements TabCompleter {
     List<String> arguments = new ArrayList<String>();
     List<String> emptyList = new ArrayList<String>();
-    List<String> bulkColourGroups = Arrays.asList("all_dye", "all_wool", "all_carpet", "all_terracotta", "all_glazed_terracotta", "all_glass", "all_glass_pane", "all_shulker_box", "all_concrete", "all_concrete_powder", "all_bed", "all_banner");
+    List<String> bulkColourGroups = Arrays.asList("all_dye", "all_wool", "all_carpet", "all_terracotta", "all_glazed_terracotta", "all_glass", "all_glass_pane", "all_concrete", "all_concrete_powder", "all_bed", "all_banner");
 
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (arguments.isEmpty()) {
             if (sender.hasPermission("customstacksize.reload")) {
                 arguments.add("reload");
             }
-            if (sender.hasPermission("customstacksize.set")) {
+            if (sender.hasPermission("customstacksize.modify")) {
                 arguments.add("set");
             }
             if (sender.hasPermission("customstacksize.view")) {
@@ -37,7 +38,7 @@ public class tabcomplete implements TabCompleter {
             }
             return arg0;
         } else if (args.length == 2) {
-                if (args[0].equalsIgnoreCase("set") && sender.hasPermission("customstacksize.set")) {
+                if (args[0].equalsIgnoreCase("set") && sender.hasPermission("customstacksize.modify")) {
                 List<String> arg1 = new ArrayList<String>();
                 Material[] materials = Material.values();
                 for (Material a : materials) {
@@ -70,7 +71,7 @@ public class tabcomplete implements TabCompleter {
                 return emptyList;
             }
         } else if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("set") && sender.hasPermission("customstacksize.set")) {
+            if (args[0].equalsIgnoreCase("set") && sender.hasPermission("customstacksize.modify")) {
                 List<String> arg2 = new ArrayList<String>();
                 int[] sizes = {1, 64};
                 for (int a : sizes) {

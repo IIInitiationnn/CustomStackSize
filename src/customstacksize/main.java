@@ -1,18 +1,21 @@
 package customstacksize;
 
-import net.minecraft.server.v1_16_R1.Item;
-import net.minecraft.server.v1_16_R1.Items;
+import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Logger;
@@ -22,8 +25,9 @@ public class main extends JavaPlugin implements Listener {
     private Map<Material, Integer> originalStackSizes = new HashMap<>();;
 
     // TODO: IS THERE ANY OTHER PROPERTY EG IN INVENTORY WE CAN CHANGE TO MINIMISE THE FIDDLYNESS?
-    // TODO buckets and soups??? events
-    // TODO handle stacks on the ground?
+    // TODO: handle stacks on the ground?
+    // TODO: bukkit's isItem is unreliable. this will let the plugin set air and shulkers - replace all instances of isItem once a solution is found
+    // maybe try use Item with catch try (uses NMS, more reliable)
 
     // STARTUP
     @java.lang.Override
@@ -39,12 +43,6 @@ public class main extends JavaPlugin implements Listener {
 
     // RELOAD
     public void reload() {
-        /*Player[] allPlayers = new Player[this.getServer().getOnlinePlayers().size()];
-        this.getServer().getOnlinePlayers().toArray(allPlayers);
-        for (Player a : allPlayers) {
-            a.recalculatePermissions();
-            this.log.info("Recalculating permissions for" + a.getName());
-        }*/
         this.getCommand("customstacksize").setExecutor(new commands(this));
         this.getCommand("customstacksize").setTabCompleter(new tabcomplete());
         this.resetAllStackSizes();
@@ -75,14 +73,14 @@ public class main extends JavaPlugin implements Listener {
             Material currentMaterial = Material.matchMaterial(eachItem);
             Item currentItem;
             try {
-                currentItem = (Item)Items.class.getField(eachItem).get((Object)null);
+                currentItem = (Item)Class.forName("org.bukkit.craftbukkit." + this.getServer().getClass().getPackage().getName().split("\\.")[3] + ".util.CraftMagicNumbers").getDeclaredMethod("getItem", Material.class).invoke(null, currentMaterial);;
             } catch (Exception error2) {
-                error2.printStackTrace();
+                this.log.warning(eachItem + " is not a valid item. Skipping.");
                 continue;
             }
 
-            if (currentMaterial == null || !currentMaterial.isItem()) {
-                this.log.warning("\"" + eachItem + "\" is not a valid item. Skipping.");
+            if (currentMaterial == null) {
+                this.log.warning(eachItem + " is not a valid item. Skipping.");
                 continue;
             }
             String stackSize = getConfig().getString(eachItem);
@@ -92,11 +90,11 @@ public class main extends JavaPlugin implements Listener {
             try {
                 stackSizeInt = Integer.parseInt(stackSize);
                 if (stackSizeInt < 1 || stackSizeInt > 64) {
-                    this.log.warning("\"" + stackSize + "\" is not a valid stack size (must be an integer between 1 and 64 inclusive). Skipping.");
+                    this.log.warning(stackSize + " is not a valid stack size (must be an integer between 1 and 64 inclusive). Skipping.");
                     continue;
                 }
             } catch (NumberFormatException error3) {
-                this.log.warning("\"" + stackSize + "\" is not a valid stack size (must be an integer between 1 and 64 inclusive). Skipping.");
+                this.log.warning(stackSize + " is not a valid stack size (must be an integer between 1 and 64 inclusive). Skipping.");
                 continue;
             }
 
@@ -116,12 +114,12 @@ public class main extends JavaPlugin implements Listener {
                 this.log.warning(item + "already has stack size" + stackSize + ". Skipping.");
             }
 
-            // Modify stack size in Material (Bukkit)
+            // Modify stack size in Material (Bukkit).
             Field materialField = Material.class.getDeclaredField("maxStack");
             materialField.setAccessible(true);
             materialField.setInt(material, stackSize);
 
-            // Modify stack size in Item (Minecraft)
+            // Modify stack size in Item (Minecraft).
             Field itemField = Item.class.getDeclaredField("maxStackSize");
             itemField.setAccessible(true);
             itemField.setInt(item, stackSize);
@@ -148,13 +146,12 @@ public class main extends JavaPlugin implements Listener {
             Material currentMaterial = Material.matchMaterial(eachItem);
             Item currentItem;
             try {
-                currentItem = (Item)Items.class.getField(eachItem).get((Object)null);
+                currentItem = (Item)Class.forName("org.bukkit.craftbukkit." + this.getServer().getClass().getPackage().getName().split("\\.")[3] + ".util.CraftMagicNumbers").getDeclaredMethod("getItem", Material.class).invoke(null, currentMaterial);;
             } catch (Exception error2) {
-                error2.printStackTrace();
                 continue;
             }
 
-            if (currentMaterial == null || !currentMaterial.isItem()) {
+            if (currentMaterial == null) {
                 continue;
             }
             String stackSize = getConfig().getString(eachItem);
@@ -170,12 +167,12 @@ public class main extends JavaPlugin implements Listener {
             int oldSize = item.getMaxStackSize();
             int newSize = originalStackSizes.remove(material);
 
-            // Modify stack size in Material (Bukkit)
+            // Modify stack size in Material (Bukkit).
             Field materialField = Material.class.getDeclaredField("maxStack");
             materialField.setAccessible(true);
             materialField.setInt(material, newSize);
 
-            // Modify stack size in Item (Minecraft)
+            // Modify stack size in Item (Minecraft).
             Field itemField = Item.class.getDeclaredField("maxStackSize");
             itemField.setAccessible(true);
             itemField.setInt(item, newSize);
@@ -204,7 +201,7 @@ public class main extends JavaPlugin implements Listener {
                 continue;
             }
             Material currentMaterial = Material.matchMaterial(eachItem);
-            if (currentMaterial == null || !currentMaterial.isItem()) {
+            if (currentMaterial == null) {
                 continue;
             }
             String stackSize = getConfig().getString(eachItem);
@@ -232,7 +229,7 @@ public class main extends JavaPlugin implements Listener {
         for (String eachItem : items) {
             // Verify item name is valid.
             Material currentMaterial = Material.matchMaterial(eachItem);
-            if (currentMaterial == null || !currentMaterial.isItem()) {
+            if (currentMaterial == null) {
                 continue;
             }
             String stackSize = getConfig().getString(eachItem);
@@ -254,31 +251,230 @@ public class main extends JavaPlugin implements Listener {
 
 
     // MODIFY ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "SET <ITEM> <SIZE>"
-    // TODO
+    public boolean setStackCommand(CommandSender sender, String itemName, String size) {
+        int newSize;
+        try {
+            newSize = Integer.parseInt(size);
+            if (newSize < 1 || newSize > 64) {
+                sender.sendMessage(ChatColor.RED + size + " is not a valid stack size (must be an integer between 1 and 64 inclusive).");
+                return true;
+            }
+        } catch (Exception error) {
+            sender.sendMessage(ChatColor.RED + size + " is not a valid stack size (must be an integer between 1 and 64 inclusive).");
+            return true;
+        }
+
+        switch (itemName.toLowerCase()) {
+            case "all_dye":
+            case "all_wool":
+            case "all_carpet":
+            case "all_terracotta":
+            case "all_glazed_terracotta":
+            case "all_glass":
+            case "all_glass_pane":
+            case "all_concrete":
+            case "all_concrete_powder":
+            case "all_bed":
+            case "all_banner":
+                return setBulk(sender, itemName.replaceAll("all_", ""), size);
+            default:
+                return executeSet(sender, itemName.toUpperCase(), newSize);
+        }
+    }
+
+    // SET COLLECTION OF COLOURED ITEMS TO THE SAME STACK SIZE
+    public boolean setBulk(CommandSender sender, String category, String size) {
+        String[] colours = {"black", "blue", "brown", "cyan", "gray", "green", "light_blue", "light_gray", "lime", "magenta", "orange", "pink", "purple", "red", "white", "yellow",};
+        int newSize;
+        try {
+            newSize = Integer.parseInt(size);
+            if (newSize < 1 || newSize > 64) {
+                sender.sendMessage(ChatColor.RED + size + " is not a valid stack size (must be an integer between 1 and 64 inclusive).");
+                return true;
+            }
+        } catch (Exception error) {
+            sender.sendMessage(ChatColor.RED + size + " is not a valid stack size (must be an integer between 1 and 64 inclusive).");
+            return true;
+        }
+
+        for (String colour : colours) {
+            String itemName = category.equalsIgnoreCase("glass") || category.equalsIgnoreCase("glass_pane") ? (colour + "_stained_" + category).toUpperCase() : (colour + "_" + category).toUpperCase();
+            executeSet(sender, itemName, newSize);
+        }
+
+        if (category.equalsIgnoreCase("glass")) {
+            executeSet(sender, "GLASS", newSize);
+        } else if (category.equalsIgnoreCase("glass_pane")) {
+            executeSet(sender, "GLASS_PANE", newSize);
+        } else if (category.equalsIgnoreCase("terracotta")) {
+            executeSet(sender, "TERRACOTTA", newSize);
+        }
+
+        return false;
+    }
+
+    // EXECUTING THE SET COMMAND
+    public boolean executeSet(CommandSender sender, String itemName, int newSize) {
+        Material material = Material.matchMaterial(itemName);
+        Item item;
+        try {
+            item = (Item)Class.forName("org.bukkit.craftbukkit." + this.getServer().getClass().getPackage().getName().split("\\.")[3] + ".util.CraftMagicNumbers").getDeclaredMethod("getItem", Material.class).invoke(null, material);;
+        } catch (Exception error2) {
+            sender.sendMessage(ChatColor.RED + itemName + " is not a valid item.");
+            return true;
+        }
+
+        if (material == null) {
+            sender.sendMessage(ChatColor.RED + itemName + " is not a valid item.");
+            return true;
+        }
+        int oldSize = material.getMaxStackSize();
+        if (oldSize == newSize) {
+            sender.sendMessage(ChatColor.RED + itemName + " already has stack size " + oldSize + ".");
+            return true;
+        }
+        this.getConfig().set(itemName, newSize);
+        this.saveConfig();
+        setupStackSize(material, item, newSize);
+
+        sender.sendMessage(ChatColor.GREEN + "Set stack size for " + ChatColor.GOLD + itemName + ChatColor.GREEN + " from " + ChatColor.GOLD + oldSize + ChatColor.GREEN + " to " + ChatColor.GOLD + newSize + ChatColor.GREEN + ".");
+        return false;
+    }
 
     // RESET ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "REVERT <ITEM>"
     // TODO
 
-    // EMPTY BUCKETS
+    // PLAYERS EMPTYING BUCKETS
     @EventHandler
-    public void onBucketEmpty(PlayerBucketEmptyEvent event) {
-        ItemStack filledBucket = event.getPlayer().getInventory().getItemInMainHand();
-        filledBucket.setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
-
-        if (filledBucket.getAmount() == 0) {
+    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
+        if (event.getPlayer().getGameMode().equals(GameMode.valueOf("CREATIVE"))) {
             return;
         }
-        String[] liquidType = (event.getBucket().toString().split("_"));
-        event.getBlock().setType(Objects.requireNonNull(Material.matchMaterial(liquidType[0])));
+
+        ItemStack filledBucket = event.getPlayer().getInventory().getItemInMainHand();
+        // Only one bucket, Minecraft will handle.
+        if (filledBucket.getAmount() - 1 == 0) {
+            return;
+        } else {
+            filledBucket.setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
+        }
+
+        // Cancel event, empty bucket manually.
+        String bucketContents = event.getBucket().name();
+        bucketContents = bucketContents.replaceAll("_BUCKET", "");
+        if (!bucketContents.equalsIgnoreCase("LAVA")) {
+            // Need to place water
+            event.getBlock().setType(Material.WATER);
+            if (!bucketContents.equalsIgnoreCase("WATER")) {
+                // Need to place fish
+                // TODO handle tropical fish's NBT
+                event.getBlock().getWorld().spawnEntity(event.getBlock().getLocation(), EntityType.valueOf(bucketContents));
+            }
+        } else {
+            // Need to place lava.
+            event.getBlock().setType(Material.LAVA);
+        }
         event.setCancelled(true);
 
-        ItemStack bucket = new ItemStack(Objects.requireNonNull(Material.matchMaterial("bucket")));
-        if (event.getPlayer().getInventory().firstEmpty() == -1) {
-            // inventory full
+        // TODO handle player statistics
+
+        ItemStack bucket = new ItemStack(Material.BUCKET);
+
+        // Determines if player has space for buckets in inventory.
+        int numBuckets = 0;
+        int numStacks = 0;
+        for (ItemStack emptyBuckets : event.getPlayer().getInventory().getContents()) {
+            if (emptyBuckets != null && emptyBuckets.getType().equals(Material.BUCKET)) {
+                numBuckets += emptyBuckets.getAmount();
+                numStacks += 1;
+            }
+        }
+        boolean spaceForEmptyBuckets = numBuckets < (numStacks * Material.BUCKET.getMaxStackSize());
+
+        if (spaceForEmptyBuckets) {
+            // Inventory has a bucket stack to which an extra bucket can be added.
+            event.getPlayer().getInventory().addItem(bucket);
+        } else if (event.getPlayer().getInventory().firstEmpty() == -1) {
+            // Inventory is completely full.
             event.getPlayer().getWorld().dropItemNaturally(event.getPlayer().getLocation(), bucket);
         } else {
-            // inventory has space
+            // Inventory has space.
             event.getPlayer().getInventory().addItem(bucket);
         }
     }
+
+    // PLAYERS DRINKING MILK OR STEWS
+    @EventHandler
+    // TODO FIND SOURCE OF LOOP USING LOG.INFO
+    public void onPlayerConsumeFood(PlayerItemConsumeEvent event) {
+        if (event.getPlayer().getGameMode().equals(GameMode.valueOf("CREATIVE"))) {
+            return;
+        }
+        ItemStack foodItemStack = event.getPlayer().getInventory().getItemInMainHand();
+        String foodName = foodItemStack.getType().name();
+
+        // Determine which container to return. Terminate if not an appropriate food item.
+        ItemStack container;
+        Material container2;
+        if (foodName.equalsIgnoreCase("MUSHROOM_STEW") || foodName.equalsIgnoreCase("RABBIT_STEW") ||
+                foodName.equalsIgnoreCase("SUSPICIOUS_STEW") || foodName.equalsIgnoreCase("BEETROOT_SOUP")) {
+            container2 = Material.BOWL;
+            container = new ItemStack(Material.BOWL);
+        } else if (foodName.equalsIgnoreCase("MILK_BUCKET")) {
+            container2 = Material.BUCKET;
+            container = new ItemStack(Material.BUCKET);
+        } else {
+            return;
+        }
+
+        // Only one foodstuff, Minecraft will handle.
+        if (foodItemStack.getAmount() - 1 == 0) {
+            return;
+        } else {
+            foodItemStack.setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
+        }
+
+        // Cancel event, feed player manually.
+        Item foodItem;
+        try {
+            foodItem = (Item)Items.class.getField(foodName).get((Object)null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+        int oldHunger = event.getPlayer().getFoodLevel();
+        int newHunger = Math.min(foodItem.getFoodInfo().getNutrition() + oldHunger, 20);
+        float oldSaturation = event.getPlayer().getSaturation();
+        float newSaturation = Math.min(foodItem.getFoodInfo().getSaturationModifier() + oldSaturation, 5.0F);
+        event.getPlayer().setFoodLevel(newHunger);
+        // TODO apply effect of milk / sus stew
+        event.setCancelled(true);
+
+
+        // TODO handle player statistics
+
+        // Determines if player has space for containers in inventory.
+        int numContainers = 0;
+        int numStacks = 0;
+        for (ItemStack emptyContainers : event.getPlayer().getInventory().getContents()) {
+            if (emptyContainers != null && emptyContainers.getType().equals(container2)) {
+                numContainers += emptyContainers.getAmount();
+                numStacks += 1;
+            }
+        }
+        boolean spaceForEmptyContainers = numContainers < (numStacks * container2.getMaxStackSize());
+
+        if (spaceForEmptyContainers) {
+            // Inventory has a container stack which can be added to
+            event.getPlayer().getInventory().addItem(container);
+        } else if (event.getPlayer().getInventory().firstEmpty() == -1) {
+            // Inventory is completely full
+            event.getPlayer().getWorld().dropItemNaturally(event.getPlayer().getLocation(), container);
+        } else {
+            // Inventory has space
+            event.getPlayer().getInventory().addItem(container);
+        }
+
+    }
+
 }

@@ -11,7 +11,7 @@ commands:
 permissions:
   customstacksize.reload:
     default: op
-  customstacksize.set:
+  customstacksize.modify:
     default: op
   customstacksize.view:
     default: true
