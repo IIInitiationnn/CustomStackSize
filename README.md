@@ -16,7 +16,7 @@ Tested with Spigot 1.16.1.
 | `css list` | Displays all items with custom stack sizes. | `customstacksize.view` |
 | `css reload` | Reloads the config and plugin. | `customstacksize.reload` |
 | `css set <item> <size>` | Sets the stack size of the item and adds it to the config. | `customstacksize.modify` |
-| `css revert <item>` | Reverts the stack size of the item to its Vanilla size and removes it from the config. | `customstacksize.modify` |
+| `css reset <item>` | Resets the stack size of the item to its Vanilla size and removes it from the config. | `customstacksize.modify` |
 ### Permissions
 | Permission | Description | Default |
 | ---------- | ----------- | ------- |

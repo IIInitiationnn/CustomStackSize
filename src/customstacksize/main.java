@@ -26,8 +26,6 @@ public class main extends JavaPlugin implements Listener {
 
     // TODO: IS THERE ANY OTHER PROPERTY EG IN INVENTORY WE CAN CHANGE TO MINIMISE THE FIDDLYNESS?
     // TODO: handle stacks on the ground?
-    // TODO: bukkit's isItem is unreliable. this will let the plugin set air and shulkers - replace all instances of isItem once a solution is found
-    // maybe try use Item with catch try (uses NMS, more reliable)
 
     // STARTUP
     @java.lang.Override
@@ -37,14 +35,14 @@ public class main extends JavaPlugin implements Listener {
         this.saveDefaultConfig();
         this.getServer().getPluginManager().registerEvents(this, this);
         this.getCommand("customstacksize").setExecutor(new commands(this));
-        this.getCommand("customstacksize").setTabCompleter(new tabcomplete());
+        this.getCommand("customstacksize").setTabCompleter(new tabcomplete(this));
         this.setupAllStackSizes();
     }
 
     // RELOAD
     public void reload() {
         this.getCommand("customstacksize").setExecutor(new commands(this));
-        this.getCommand("customstacksize").setTabCompleter(new tabcomplete());
+        this.getCommand("customstacksize").setTabCompleter(new tabcomplete(this));
         this.resetAllStackSizes();
         this.reloadConfig();
         this.setupAllStackSizes();
@@ -111,7 +109,9 @@ public class main extends JavaPlugin implements Listener {
             }
 
             if (stackSize == material.getMaxStackSize()) {
-                this.log.warning(item + "already has stack size" + stackSize + ". Skipping.");
+                this.log.warning(item + " already has stack size " + stackSize + ". Skipping.");
+                this.originalStackSizes.remove(material);
+                return;
             }
 
             // Modify stack size in Material (Bukkit).
@@ -161,23 +161,24 @@ public class main extends JavaPlugin implements Listener {
     }
 
     // WIPE STACK SIZE FOR ITEM ON SERVER
-    private void resetStackSize(Material material, Item item) {
+    private int resetStackSize(Material material, Item item) {
         try {
             // Obtain original stack sizes and remove item from map.
-            int oldSize = item.getMaxStackSize();
-            int newSize = originalStackSizes.remove(material);
+            int vanillaSize = originalStackSizes.remove(material);
 
             // Modify stack size in Material (Bukkit).
             Field materialField = Material.class.getDeclaredField("maxStack");
             materialField.setAccessible(true);
-            materialField.setInt(material, newSize);
+            materialField.setInt(material, vanillaSize);
 
             // Modify stack size in Item (Minecraft).
             Field itemField = Item.class.getDeclaredField("maxStackSize");
             itemField.setAccessible(true);
-            itemField.setInt(item, newSize);
+            itemField.setInt(item, vanillaSize);
+            return vanillaSize;
         } catch (Exception e) {
             e.printStackTrace();
+            return -1;
         }
     }
 
@@ -222,7 +223,6 @@ public class main extends JavaPlugin implements Listener {
 
     // DISPLAY LIST OF CUSTOM STACK SIZES: COMMAND "LIST"
     public void list(CommandSender sender) {
-        sender.sendMessage(ChatColor.GOLD + "All items with custom stack sizes:");
 
         Set<String> items;
         try {
@@ -230,6 +230,12 @@ public class main extends JavaPlugin implements Listener {
         } catch (NullPointerException error1) {
             this.log.warning("Unable to retrieve information.");
             return;
+        }
+
+        if (items.isEmpty()) {
+            sender.sendMessage(ChatColor.GOLD + "There are currently no items with custom stack sizes.");
+        } else {
+            sender.sendMessage(ChatColor.GOLD + "All items with custom stack sizes:");
         }
 
         // Verify that the inputs are valid.
@@ -254,8 +260,6 @@ public class main extends JavaPlugin implements Listener {
             sender.sendMessage(ChatColor.GOLD + eachItem + ChatColor.WHITE + ": " + Integer.parseInt(stackSize));
         }
     }
-
-
 
     // MODIFY ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "SET <ITEM> <SIZE>"
     public boolean setStackCommand(CommandSender sender, String itemName, String size) {
@@ -326,7 +330,7 @@ public class main extends JavaPlugin implements Listener {
         Item item;
         try {
             item = (Item)Class.forName("org.bukkit.craftbukkit." + this.getServer().getClass().getPackage().getName().split("\\.")[3] + ".util.CraftMagicNumbers").getDeclaredMethod("getItem", Material.class).invoke(null, material);;
-        } catch (Exception error2) {
+        } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + itemName + " is not a valid item.");
             return true;
         }
@@ -335,11 +339,16 @@ public class main extends JavaPlugin implements Listener {
             sender.sendMessage(ChatColor.RED + itemName + " is not a valid item.");
             return true;
         }
+
         int oldSize = material.getMaxStackSize();
         if (oldSize == newSize) {
-            sender.sendMessage(ChatColor.RED + itemName + " already has stack size " + oldSize + ".");
+            sender.sendMessage(ChatColor.RED + itemName + " already has stack size " + newSize + ".");
+            return true;
+        } else if (this.originalStackSizes.containsKey(material) && this.originalStackSizes.get(material) == newSize) {
+            sender.sendMessage(ChatColor.RED + String.valueOf(newSize) + " is the Vanilla stack size for " + itemName + ". Try using /css reset " + itemName.toLowerCase() + ".");
             return true;
         }
+
         this.getConfig().set(itemName, newSize);
         this.saveConfig();
         setupStackSize(material, item, newSize);
@@ -348,8 +357,36 @@ public class main extends JavaPlugin implements Listener {
         return false;
     }
 
-    // RESET ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "REVERT <ITEM>"
-    // TODO
+    // RESET ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "RESET <ITEM>"
+    public boolean resetStackCommand(CommandSender sender, String itemName) {
+        Material material = Material.matchMaterial(itemName);
+        Item item;
+        try {
+            item = (Item)Class.forName("org.bukkit.craftbukkit." + this.getServer().getClass().getPackage().getName().split("\\.")[3] + ".util.CraftMagicNumbers").getDeclaredMethod("getItem", Material.class).invoke(null, material);;
+        } catch (Exception e) {
+            sender.sendMessage(ChatColor.RED + itemName.toUpperCase() + " is not a valid item.");
+            return true;
+        }
+
+        if (material == null) {
+            sender.sendMessage(ChatColor.RED + itemName.toUpperCase() + " is not a valid item.");
+            return true;
+        }
+
+        int customSize = material.getMaxStackSize();
+        boolean hasVanillaSize = !originalStackSizes.containsKey(material);
+        if (hasVanillaSize) {
+            sender.sendMessage(ChatColor.RED + itemName.toUpperCase() + " already has its Vanilla stack size " + customSize + ".");
+            return true;
+        }
+
+        this.getConfig().set(itemName.toUpperCase(), null);
+        this.saveConfig();
+        int vanillaSize = resetStackSize(material, item);
+        sender.sendMessage(ChatColor.GREEN + "Reset stack size for " + ChatColor.GOLD + itemName.toUpperCase() + ChatColor.GREEN + " from " + ChatColor.GOLD + customSize + ChatColor.GREEN + " to " + ChatColor.GOLD + vanillaSize + ChatColor.GREEN + ".");
+        this.log.info("Resetting the stack size for " + itemName + " to " + vanillaSize + ".");
+        return false;
+    }
 
     // PLAYERS EMPTYING BUCKETS
     @EventHandler

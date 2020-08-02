@@ -9,11 +9,18 @@ import org.bukkit.command.TabCompleter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class tabcomplete implements TabCompleter {
     List<String> arguments = new ArrayList<String>();
     List<String> emptyList = new ArrayList<String>();
-    List<String> bulkColourGroups = Arrays.asList("all_dye", "all_wool", "all_carpet", "all_terracotta", "all_glazed_terracotta", "all_glass", "all_glass_pane", "all_concrete", "all_concrete_powder", "all_bed", "all_banner");
+    List<String> bulkColourGroups = Arrays.asList("all_dye", "all_wool", "all_carpet", "all_terracotta", "all_glazed_terracotta", "all_glass", "all_glass_pane", "all_concrete", "all_concrete_powder", "all_bed", "all_banner", "all_shulker_box");
+
+    private main pluginInstance;
+
+    tabcomplete(main pluginInstance) {
+        this.pluginInstance = pluginInstance;
+    }
 
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (arguments.isEmpty()) {
@@ -22,6 +29,7 @@ public class tabcomplete implements TabCompleter {
             }
             if (sender.hasPermission("customstacksize.modify")) {
                 arguments.add("set");
+                arguments.add("reset");
             }
             if (sender.hasPermission("customstacksize.view")) {
                 arguments.add("display");
@@ -38,7 +46,7 @@ public class tabcomplete implements TabCompleter {
             }
             return arg0;
         } else if (args.length == 2) {
-                if (args[0].equalsIgnoreCase("set") && sender.hasPermission("customstacksize.modify")) {
+            if (args[0].equalsIgnoreCase("set") && sender.hasPermission("customstacksize.modify")) {
                 List<String> arg1 = new ArrayList<String>();
                 Material[] materials = Material.values();
                 for (Material a : materials) {
@@ -52,6 +60,25 @@ public class tabcomplete implements TabCompleter {
                 for (String a : bulkColourGroups) {
                     if (a.toLowerCase().startsWith(args[1].toLowerCase())) {
                         arg1.add(a.toLowerCase());
+                    }
+                }
+                return arg1;
+            } else if (args[0].equalsIgnoreCase("reset") && sender.hasPermission("customstacksize.modify")) {
+                Set<String> itemsFromConfig;
+                List<String> arg1 = new ArrayList<String>();
+                try {
+                    itemsFromConfig = pluginInstance.getConfig().getKeys(true);
+                } catch (NullPointerException error1) {
+                    return emptyList;
+                }
+
+                for (String eachItem : itemsFromConfig) {
+                    Material currentMaterial = Material.matchMaterial(eachItem);
+                    if (currentMaterial == null) {
+                        continue;
+                    }
+                    if (currentMaterial.name().toLowerCase().startsWith(args[1].toLowerCase())) {
+                        arg1.add(currentMaterial.name().toLowerCase());
                     }
                 }
                 return arg1;
