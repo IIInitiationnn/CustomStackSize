@@ -22,4 +22,4 @@ Tested with Spigot 1.16.1.
 | ---------- | ----------- | ------- |
 | `customstacksize.view` | Permission to use `css display` and `css list`. | All |
 | `customstacksize.reload` | Permission to use `css reload`. | Operator |
-| `customstacksize.modify` | Permission to use `css set` and `css revert`. | Operator |
+| `customstacksize.modify` | Permission to use `css set` and `css reset`. | Operator |

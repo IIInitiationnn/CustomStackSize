@@ -1,9 +1,9 @@
 # CustomStackSize Configuration
 # Created by IIInitiationnn
 
-# Item List
+# ITEM LIST
 # Valid items can be found at https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
-# Note that any items with unique NBT tags (such as shulker boxes, once filled) will not stack.
+# Note that any items with different NBT information will not stack. Some information can be found at https://hub.spigotmc.org/javadocs/spigot/org/bukkit/inventory/meta/ItemMeta.html
 # You are also able to use /css set <group> <size> with the following groups:
 # ALL_DYE, ALL_WOOL, ALL_CARPET, ALL_TERRACOTTA, ALL_GLAZED_TERRACOTTA, ALL_GLASS, ALL_GLASS_PANE, ALL_CONCRETE, ALL_CONCRETE_POWDER, ALL_BED, ALL_BANNER, ALL_SHULKER_BOX
 

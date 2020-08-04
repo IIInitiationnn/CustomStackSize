@@ -287,6 +287,7 @@ public class main extends JavaPlugin implements Listener {
             case "all_concrete_powder":
             case "all_bed":
             case "all_banner":
+            case "all_shulker_box":
                 return setBulk(sender, itemName.replaceAll("all_", ""), size);
             default:
                 return executeSet(sender, itemName.toUpperCase(), newSize);
@@ -319,6 +320,8 @@ public class main extends JavaPlugin implements Listener {
             executeSet(sender, "GLASS_PANE", newSize);
         } else if (category.equalsIgnoreCase("terracotta")) {
             executeSet(sender, "TERRACOTTA", newSize);
+        } else if (category.equalsIgnoreCase("shulker_box")) {
+            executeSet(sender, "SHULKER_BOX", newSize);
         }
 
         return false;
@@ -411,7 +414,6 @@ public class main extends JavaPlugin implements Listener {
             event.getBlock().setType(Material.WATER);
             if (!bucketContents.equalsIgnoreCase("WATER")) {
                 // Need to place fish
-                // TODO handle tropical fish's NBT
                 event.getBlock().getWorld().spawnEntity(event.getBlock().getLocation(), EntityType.valueOf(bucketContents));
             }
         } else {
