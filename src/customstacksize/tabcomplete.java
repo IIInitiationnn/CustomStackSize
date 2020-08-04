@@ -14,7 +14,7 @@ import java.util.Set;
 public class tabcomplete implements TabCompleter {
     List<String> arguments = new ArrayList<String>();
     List<String> emptyList = new ArrayList<String>();
-    List<String> bulkColourGroups = Arrays.asList("all_dye", "all_wool", "all_carpet", "all_terracotta", "all_glazed_terracotta", "all_glass", "all_glass_pane", "all_concrete", "all_concrete_powder", "all_bed", "all_banner", "all_shulker_box");
+    List<String> bulkGroups = Arrays.asList("all_dye", "all_wool", "all_carpet", "all_terracotta", "all_glazed_terracotta", "all_glass", "all_glass_pane", "all_concrete", "all_concrete_powder", "all_bed", "all_banner", "all_shulker_box", "all_planks", "all_slab", "all_stairs", "all_sapling", "all_log", "all_wood", "all_stripped_log", "all_stripped_wood", "all_leaves", "all_fence", "all_fence_gate", "all_sign", "all_boat", "all_door", "all_trapdoor", "all_button", "all_pressure_plate");
 
     private main pluginInstance;
 
@@ -57,7 +57,7 @@ public class tabcomplete implements TabCompleter {
                         arg1.add(a.name().toLowerCase());
                     }
                 }
-                for (String a : bulkColourGroups) {
+                for (String a : bulkGroups) {
                     if (a.toLowerCase().startsWith(args[1].toLowerCase())) {
                         arg1.add(a.toLowerCase());
                     }

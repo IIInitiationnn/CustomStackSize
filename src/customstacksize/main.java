@@ -288,14 +288,32 @@ public class main extends JavaPlugin implements Listener {
             case "all_bed":
             case "all_banner":
             case "all_shulker_box":
-                return setBulk(sender, itemName.replaceAll("all_", ""), size);
+                return setBulkColoured(sender, itemName.replaceAll("all_", ""), size);
+            case "all_planks":
+            case "all_slab":
+            case "all_stairs":
+            case "all_sapling":
+            case "all_log":
+            case "all_wood":
+            case "all_stripped_log":
+            case "all_stripped_wood":
+            case "all_leaves":
+            case "all_fence":
+            case "all_fence_gate":
+            case "all_sign":
+            case "all_boat":
+            case "all_door":
+            case "all_trapdoor":
+            case "all_button":
+            case "all_pressure_plate":
+                return setBulkWooden(sender, itemName.replaceAll("all_", ""), size);
             default:
                 return executeSet(sender, itemName.toUpperCase(), newSize);
         }
     }
 
     // SET COLLECTION OF COLOURED ITEMS TO THE SAME STACK SIZE
-    public boolean setBulk(CommandSender sender, String category, String size) {
+    public boolean setBulkColoured(CommandSender sender, String category, String size) {
         String[] colours = {"red", "lime", "pink", "blue", "cyan", "gray", "white", "black", "brown", "green", "orange", "purple", "yellow", "magenta", "light_blue", "light_gray"};
         int newSize;
         try {
@@ -322,6 +340,85 @@ public class main extends JavaPlugin implements Listener {
             executeSet(sender, "TERRACOTTA", newSize);
         } else if (category.equalsIgnoreCase("shulker_box")) {
             executeSet(sender, "SHULKER_BOX", newSize);
+        }
+
+        return false;
+    }
+
+    // SET COLLECTION OF WOODEN ITEMS TO THE SAME STACK SIZE
+    public boolean setBulkWooden(CommandSender sender, String category, String size) {
+        String[] woods = {"oak", "birch", "acacia", "spruce", "jungle", "dark_oak"};
+        String[] fungi = {"warped", "crimson"};
+
+        int newSize;
+        try {
+            newSize = Integer.parseInt(size);
+            if (newSize < 1 || newSize > 64) {
+                sender.sendMessage(ChatColor.RED + size + " is not a valid stack size (must be an integer between 1 and 64 inclusive).");
+                return true;
+            }
+        } catch (Exception error) {
+            sender.sendMessage(ChatColor.RED + size + " is not a valid stack size (must be an integer between 1 and 64 inclusive).");
+            return true;
+        }
+
+        List <String> items = new ArrayList<String>();
+        for (String wood : woods) {
+            switch (category) {
+                case "stripped_log":
+                    items.add(("stripped_" + wood + "_log").toUpperCase());
+                    break;
+                case "stripped_wood":
+                    items.add(("stripped_" + wood + "_wood").toUpperCase());
+                    break;
+                default:
+                    items.add((wood + "_" + category).toUpperCase());
+                    break;
+            }
+        }
+        for (String fungus : fungi) {
+            switch (category) {
+                case "boat":
+                case "leaves":
+                    break;
+                case "sapling":
+                    items.add((fungus + "_fungus").toUpperCase());
+                    break;
+                case "log":
+                    items.add((fungus + "_stem").toUpperCase());
+                    break;
+                case "wood":
+                    items.add((fungus + "_hyphae").toUpperCase());
+                    break;
+                case "stripped_log":
+                    items.add(("stripped_" + fungus + "_stem").toUpperCase());
+                    break;
+                case "stripped_wood":
+                    items.add(("stripped_" + fungus + "_hyphae").toUpperCase());
+                    break;
+                default:
+                    items.add((fungus + "_" + category).toUpperCase());
+                    break;
+            }
+        }
+        switch (category) {
+            case "door":
+            case "trapdoor":
+                items.add(("iron_" + category).toUpperCase());
+                break;
+            case "pressure_plate":
+                items.add(("light_weighted_" + category).toUpperCase());
+                items.add(("heavy_weighted_" + category).toUpperCase());
+            case "button":
+                items.add(("stone_" + category).toUpperCase());
+                items.add(("polished_blackstone_" + category).toUpperCase());
+                break;
+            default:
+                break;
+        }
+
+        for (String item : items) {
+            executeSet(sender, item, newSize);
         }
 
         return false;

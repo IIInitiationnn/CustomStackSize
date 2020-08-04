@@ -5,7 +5,8 @@
 # Valid items can be found at https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 # Note that any items with different NBT information will not stack. Some information can be found at https://hub.spigotmc.org/javadocs/spigot/org/bukkit/inventory/meta/ItemMeta.html
 # You are also able to use /css set <group> <size> with the following groups:
-# ALL_DYE, ALL_WOOL, ALL_CARPET, ALL_TERRACOTTA, ALL_GLAZED_TERRACOTTA, ALL_GLASS, ALL_GLASS_PANE, ALL_CONCRETE, ALL_CONCRETE_POWDER, ALL_BED, ALL_BANNER, ALL_SHULKER_BOX
+# COLOURED GROUPS: ALL_DYE, ALL_WOOL, ALL_CARPET, ALL_TERRACOTTA, ALL_GLAZED_TERRACOTTA, ALL_GLASS, ALL_GLASS_PANE, ALL_CONCRETE, ALL_CONCRETE_POWDER, ALL_BED, ALL_BANNER, ALL_SHULKER_BOX
+# WOOD GROUPS: ALL_PLANKS, ALL_SLAB, ALL_STAIRS, ALL_SAPLING, ALL_LOG, ALL_WOOD, ALL_STRIPPED_LOG, ALL_STRIPPED_WOOD, ALL_LEAVES, ALL_FENCE, ALL_FENCE_GATE, ALL_SIGN, ALL_BOAT, ALL_DOOR, ALL_TRAPDOOR, ALL_BUTTON, ALL_PRESSURE_PLATE
 
 # Use the following format:
 # ITEM: STACKSIZE
