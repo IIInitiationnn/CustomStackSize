@@ -29,6 +29,10 @@ public class main extends JavaPlugin implements Listener {
     private Logger log;
     private Map<Material, Integer> originalStackSizes = new HashMap<>();;
 
+    // POTENTIAL ISSUES
+    // Dispenser handling buckets
+    // Player dropping stacks with stack sizes > max stack size, drops on player rather than on the ground stack
+
     // STARTUP
     @java.lang.Override
     public void onEnable() {
