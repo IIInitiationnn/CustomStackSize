@@ -3,12 +3,13 @@ A Bukkit plugin to modify maximum stack sizes of items.
 ### Compatibility
 Tested with Spigot 1.16.1.
 ### Overview
-- Functionality to edit items' stack sizes from 1 to 64.
+- Functionality to edit item stack sizes within the range 1 to 64.
 - Convenient control over bulk resource groups such as by colour or type.
 - Ability to view any item's stack size.
 - Commands called using `/customstacksize` or its alias `/css`.
 - Changes to the configuration file `config.yml` loaded using `/css reload`.
 - Handles strange behaviour induced by certain interactions (emptying buckets, drinking stews).
+- Handles player statistics for items with strange behaviour.
 
 ### Commands
 | Command | Description | Permission |

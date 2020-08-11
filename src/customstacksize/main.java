@@ -4,18 +4,23 @@ import net.minecraft.server.v1_16_R1.*;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Statistic;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockDropItemEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitScheduler;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Logger;
@@ -23,9 +28,6 @@ import java.util.logging.Logger;
 public class main extends JavaPlugin implements Listener {
     private Logger log;
     private Map<Material, Integer> originalStackSizes = new HashMap<>();;
-
-    // TODO: IS THERE ANY OTHER PROPERTY EG IN INVENTORY WE CAN CHANGE TO MINIMISE THE FIDDLYNESS?
-    // TODO: handle stacks on the ground?
 
     // STARTUP
     @java.lang.Override
@@ -519,20 +521,19 @@ public class main extends JavaPlugin implements Listener {
         }
         event.setCancelled(true);
 
-        // TODO handle player statistics
+        // Increment player statistic for USE_ITEM.
+        event.getPlayer().incrementStatistic(Statistic.USE_ITEM, filledBucket.getType());
 
         ItemStack bucket = new ItemStack(Material.BUCKET);
 
         // Determines if player has space for buckets in inventory.
-        int numBuckets = 0;
-        int numStacks = 0;
+        boolean spaceForEmptyBuckets = false;
         for (ItemStack emptyBuckets : event.getPlayer().getInventory().getContents()) {
-            if (emptyBuckets != null && emptyBuckets.getType().equals(Material.BUCKET)) {
-                numBuckets += emptyBuckets.getAmount();
-                numStacks += 1;
+            if (emptyBuckets != null && emptyBuckets.getType().equals(Material.BUCKET) && (emptyBuckets.getAmount() < emptyBuckets.getMaxStackSize())) {
+                spaceForEmptyBuckets = true;
+                break;
             }
         }
-        boolean spaceForEmptyBuckets = numBuckets < (numStacks * Material.BUCKET.getMaxStackSize());
 
         if (spaceForEmptyBuckets) {
             // Inventory has a bucket stack to which an extra bucket can be added.
@@ -548,8 +549,11 @@ public class main extends JavaPlugin implements Listener {
 
     // PLAYERS DRINKING MILK OR STEWS
     @EventHandler
-    // TODO FIND SOURCE OF LOOP USING LOG.INFO
     public void onPlayerConsumeFood(PlayerItemConsumeEvent event) {
+        if (event.getPlayer().getFoodLevel() == 20) {
+            event.setCancelled(true);
+            return;
+        }
         if (event.getPlayer().getGameMode().equals(GameMode.valueOf("CREATIVE"))) {
             return;
         }
@@ -580,32 +584,42 @@ public class main extends JavaPlugin implements Listener {
         // Cancel event, feed player manually.
         Item foodItem;
         try {
-            foodItem = (Item)Items.class.getField(foodName).get((Object)null);
-        } catch (Exception e) {
-            e.printStackTrace();
+            foodItem = (Item)Class.forName("org.bukkit.craftbukkit." + this.getServer().getClass().getPackage().getName().split("\\.")[3] + ".util.CraftMagicNumbers").getDeclaredMethod("getItem", Material.class).invoke(null, foodItemStack.getType());
+        } catch (Exception error) {
+            error.printStackTrace();
             return;
         }
-        int oldHunger = event.getPlayer().getFoodLevel();
-        int newHunger = Math.min(foodItem.getFoodInfo().getNutrition() + oldHunger, 20);
-        float oldSaturation = event.getPlayer().getSaturation();
-        float newSaturation = Math.min(foodItem.getFoodInfo().getSaturationModifier() + oldSaturation, 5.0F);
-        event.getPlayer().setFoodLevel(newHunger);
-        // TODO apply effect of milk / sus stew
-        event.setCancelled(true);
 
+        try {
+            int oldHunger = event.getPlayer().getFoodLevel();
+            int newHunger = Math.min(foodItem.getFoodInfo().getNutrition() + oldHunger, 20);
+            event.getPlayer().setFoodLevel(newHunger);
+            float oldSaturation = event.getPlayer().getSaturation();
+            float newSaturation = Math.min(foodItem.getFoodInfo().getSaturationModifier() + oldSaturation, 5.0F);
+            event.getPlayer().setSaturation(newSaturation);
+        } catch (Exception error2) {
+        }
 
-        // TODO handle player statistics
-
-        // Determines if player has space for containers in inventory.
-        int numContainers = 0;
-        int numStacks = 0;
-        for (ItemStack emptyContainers : event.getPlayer().getInventory().getContents()) {
-            if (emptyContainers != null && emptyContainers.getType().equals(container2)) {
-                numContainers += emptyContainers.getAmount();
-                numStacks += 1;
+        // Removes all status effects if milk was consumed.
+        if (foodName.equalsIgnoreCase("MILK_BUCKET")) {
+            for (PotionEffect effect : event.getPlayer().getActivePotionEffects()) {
+                event.getPlayer().removePotionEffect(effect.getType());
             }
         }
-        boolean spaceForEmptyContainers = numContainers < (numStacks * container2.getMaxStackSize());
+
+        event.setCancelled(true);
+
+        // Increment player statistic for USE_ITEM.
+        event.getPlayer().incrementStatistic(Statistic.USE_ITEM, foodItemStack.getType());
+
+        // Determines if player has space for containers in inventory.
+        boolean spaceForEmptyContainers = false;
+        for (ItemStack emptyContainers : event.getPlayer().getInventory().getContents()) {
+            if (emptyContainers != null && emptyContainers.getType().equals(container2) && (emptyContainers.getAmount() < emptyContainers.getMaxStackSize())) {
+                spaceForEmptyContainers = true;
+                break;
+            }
+        }
 
         if (spaceForEmptyContainers) {
             // Inventory has a container stack which can be added to
@@ -620,4 +634,69 @@ public class main extends JavaPlugin implements Listener {
 
     }
 
+    // PLAYERS MANIPULATING INVENTORY
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        switch (event.getAction()) {
+            case PLACE_ALL:
+            case PLACE_ONE:
+            case PLACE_SOME:
+            case COLLECT_TO_CURSOR:
+            case MOVE_TO_OTHER_INVENTORY:
+            case HOTBAR_MOVE_AND_READD:
+                BukkitScheduler scheduler = getServer().getScheduler();
+                scheduler.scheduleSyncDelayedTask(this, new Runnable() {
+                    @Override
+                    public void run() {
+                        ((Player)event.getWhoClicked()).updateInventory();
+                    }
+                }, 1L);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // STACK SIZES IN THE WORLD
+    @EventHandler
+    public void onBlockDrop(BlockDropItemEvent event) {
+        List<org.bukkit.entity.Item> droppedItems = event.getItems();
+        for (org.bukkit.entity.Item droppedItem : droppedItems) {
+            int stackSize = droppedItem.getItemStack().getAmount();
+            int maxStackSize = droppedItem.getItemStack().getMaxStackSize();
+            while (stackSize > maxStackSize) {
+                droppedItem.getItemStack().setAmount(stackSize - maxStackSize);
+                ItemStack newStack = droppedItem.getItemStack();
+                newStack.setAmount(maxStackSize);
+                droppedItem.getWorld().dropItemNaturally(droppedItem.getLocation(), newStack);
+                stackSize -= maxStackSize;
+            }
+        }
+    }
+    @EventHandler
+    public void onEntityDrop(EntityDropItemEvent event) {
+        org.bukkit.entity.Item droppedItem = event.getItemDrop();
+        int stackSize = droppedItem.getItemStack().getAmount();
+        int maxStackSize = droppedItem.getItemStack().getMaxStackSize();
+        while (stackSize > maxStackSize) {
+            droppedItem.getItemStack().setAmount(stackSize - maxStackSize);
+            ItemStack newStack = droppedItem.getItemStack();
+            newStack.setAmount(maxStackSize);
+            droppedItem.getWorld().dropItemNaturally(droppedItem.getLocation(), newStack);
+            stackSize -= maxStackSize;
+        }
+    }
+    @EventHandler
+    public void onPlayerDrop(PlayerDropItemEvent event) {
+        org.bukkit.entity.Item droppedItem = event.getItemDrop();
+        int stackSize = droppedItem.getItemStack().getAmount();
+        int maxStackSize = droppedItem.getItemStack().getMaxStackSize();
+        while (stackSize > maxStackSize) {
+            droppedItem.getItemStack().setAmount(stackSize - maxStackSize);
+            ItemStack newStack = droppedItem.getItemStack();
+            newStack.setAmount(maxStackSize);
+            droppedItem.getWorld().dropItemNaturally(droppedItem.getLocation(), newStack);
+            stackSize -= maxStackSize;
+        }
+    }
 }
