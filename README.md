@@ -10,6 +10,7 @@ Tested with Spigot 1.16.1.
 - Ability to view any item's stack size.
 - Commands called using `/customstacksize` or its alias `/css`.
 - Changes to the configuration file `config.yml` loaded using `/css reload`.
+- Compatible with inventory QOL client-side mods such as Item Scroller and Inventory Sorter.
 
 ### Features
 - Handles strange behaviour induced by certain interactions (emptying buckets, drinking stews).

@@ -554,7 +554,15 @@ public class main extends JavaPlugin implements Listener {
     // PLAYERS DRINKING MILK OR STEWS
     @EventHandler
     public void onPlayerConsumeFood(PlayerItemConsumeEvent event) {
-        if (event.getPlayer().getFoodLevel() == 20) {
+        boolean isFoodItem = true;
+        switch (event.getItem().getType()) {
+            case POTION:
+                return;
+            case MILK_BUCKET:
+                isFoodItem = false;
+                break;
+        }
+        if ((event.getPlayer().getFoodLevel() == 20) && isFoodItem) {
             event.setCancelled(true);
             return;
         }
