@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDropItemEvent;
@@ -16,6 +17,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -649,6 +651,42 @@ public class main extends JavaPlugin implements Listener {
     // PLAYERS MANIPULATING INVENTORY
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getInventory().getType() == InventoryType.BREWING &&
+                Objects.requireNonNull(event.getClickedInventory()).getType() != InventoryType.BREWING) {
+
+            ItemStack item = event.getCurrentItem();
+            if ((item.getType() == Material.POTION || item.getType() == Material.SPLASH_POTION)) {
+                BrewerInventory brewingStand = (BrewerInventory) event.getInventory();
+                if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                    boolean cancel = false;
+
+                    // Prevents increasing stacks of potions in the brewing stand when shift-clicking single item.
+                    if (item.getAmount() == 1) {
+                        cancel = true;
+                    }
+
+                    int i = 0;
+                    ItemStack modifiedItem = item.clone();
+                    modifiedItem.setAmount(1);
+                    while (item.getAmount() != 0 && i < 3) {
+                        if (brewingStand.getItem(i) != null) {
+                            i++;
+                            continue;
+                        }
+                        brewingStand.setItem(i, modifiedItem);
+                        item.setAmount(item.getAmount() - 1);
+                        // Prevents moving remaining potions to the other side (main to hotbar, or hotbar to main).
+                        cancel = true;
+                        i++;
+                    }
+                    // Allows moving potions to other side when brewing stand is full of potions.
+                    if (cancel) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+
         switch (event.getAction()) {
             case PLACE_ALL:
             case PLACE_ONE:
@@ -662,11 +700,29 @@ public class main extends JavaPlugin implements Listener {
                     public void run() {
                         ((Player)event.getWhoClicked()).updateInventory();
                     }
-                }, 1L);
+                }, 2L);
                 break;
             default:
                 break;
         }
+    }
+
+    // PLAYERS SHIFT CLICKING INTO BREWING STANDS
+    @EventHandler
+    public void onShiftClick(InventoryMoveItemEvent event) {
+        if (event.getDestination().getType() != InventoryType.BREWING) {
+            return;
+        }
+        ItemStack sending = event.getItem();
+        if (sending.getType() == Material.POTION || sending.getType() == Material.SPLASH_POTION) {
+            this.log.info(String.valueOf(event.getDestination().getSize()));
+            for (ItemStack item : event.getDestination().getContents()) {
+                this.log.info(item.getType().name());
+            }
+
+        }
+        return;
+
     }
 
     // STACK SIZES IN THE WORLD
