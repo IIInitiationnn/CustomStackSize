@@ -655,7 +655,7 @@ public class main extends JavaPlugin implements Listener {
                 Objects.requireNonNull(event.getClickedInventory()).getType() != InventoryType.BREWING) {
 
             ItemStack item = event.getCurrentItem();
-            if ((item.getType() == Material.POTION || item.getType() == Material.SPLASH_POTION)) {
+            if ((item.getType() == Material.POTION || item.getType() == Material.SPLASH_POTION || item.getType() == Material.LINGERING_POTION)) {
                 BrewerInventory brewingStand = (BrewerInventory) event.getInventory();
                 if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
                     boolean cancel = false;
