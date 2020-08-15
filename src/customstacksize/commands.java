@@ -20,7 +20,7 @@ public class commands implements CommandExecutor {
                 if (!sender.hasPermission("customstacksize.reload") && !sender.hasPermission("customstacksize.modify") && !sender.hasPermission("customstacksize.view")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
-                    return true;
+                    return false;
                 }
                 sender.sendMessage(ChatColor.GOLD + "CustomStackSize commands you have access to:");
                 if (sender.hasPermission("customstacksize.reload")) {
@@ -33,7 +33,7 @@ public class commands implements CommandExecutor {
                     sender.sendMessage(ChatColor.GOLD + "/" + label + " display <item>" + ChatColor.WHITE + ": displays custom stack size of the item.");
                     sender.sendMessage(ChatColor.GOLD + "/" + label + " list" + ChatColor.WHITE + ": displays all items with custom stack sizes.");
                 }
-                return true;
+                return false;
             }
 
             // RELOAD
@@ -41,15 +41,15 @@ public class commands implements CommandExecutor {
                 if (!sender.hasPermission("customstacksize.reload")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
-                    return true;
+                    return false;
                 }
                 if (args.length != 1) {
                     sender.sendMessage(ChatColor.RED + "Usage: /" + label + " reload");
-                    return true;
+                    return false;
                 }
                 pluginInstance.reload();
                 sender.sendMessage(ChatColor.GREEN + "CustomStackSize has been successfully reloaded.");
-                return false;
+                return true;
             }
 
             // SET ITEM STACKSIZE
@@ -57,15 +57,15 @@ public class commands implements CommandExecutor {
                 if (!sender.hasPermission("customstacksize.modify")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
-                    return true;
+                    return false;
                 }
 
                 if (args.length != 3) {
                     sender.sendMessage(ChatColor.RED + "Usage: /" + label + " set <item> <size>");
-                    return true;
+                    return false;
                 }
 
-                return pluginInstance.setStackCommand(sender, args[1].toLowerCase(), args[2]);
+                return !pluginInstance.setStackCommand(sender, args[1].toLowerCase(), args[2]);
             }
 
             // RESET ITEM STACKSIZE
@@ -73,15 +73,15 @@ public class commands implements CommandExecutor {
                 if (!sender.hasPermission("customstacksize.modify")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
-                    return true;
+                    return false;
                 }
 
                 if (args.length != 2) {
                     sender.sendMessage(ChatColor.RED + "Usage: /" + label + " reset <item>");
-                    return true;
+                    return false;
                 }
 
-                return pluginInstance.resetStackCommand(sender, args[1].toLowerCase());
+                return !pluginInstance.resetStackCommand(sender, args[1].toLowerCase());
             }
 
             // DISPLAY
@@ -89,15 +89,15 @@ public class commands implements CommandExecutor {
                 if (!sender.hasPermission("customstacksize.view")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
-                    return true;
+                    return false;
                 }
 
                 if (args.length != 2) {
                     sender.sendMessage(ChatColor.RED + "Usage: /" + label + " display <item>");
-                    return true;
+                    return false;
                 }
 
-                return pluginInstance.display(sender, args[1].toUpperCase());
+                return !pluginInstance.display(sender, args[1].toUpperCase());
             }
 
             // LIST
@@ -105,24 +105,24 @@ public class commands implements CommandExecutor {
                 if (!sender.hasPermission("customstacksize.view")) {
                     sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to run this command.");
                     pluginInstance.permissionDenied(sender);
-                    return true;
+                    return false;
                 }
 
                 if (args.length != 1) {
                     sender.sendMessage(ChatColor.RED + "Usage: /" + label + " list");
-                    return true;
+                    return false;
                 }
 
                 pluginInstance.list(sender);
-                return false;
+                return true;
             }
 
             // INVALID COMMAND
             else {
                 sender.sendMessage(ChatColor.RED + "/" + label + " " + args[0] + " is not a valid command.");
-                return true;
+                return false;
             }
         }
-        return true;
+        return false;
     }
 }

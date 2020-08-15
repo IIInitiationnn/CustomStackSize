@@ -651,10 +651,13 @@ public class main extends JavaPlugin implements Listener {
     // PLAYERS MANIPULATING INVENTORY
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getInventory().getType() == InventoryType.BREWING &&
-                Objects.requireNonNull(event.getClickedInventory()).getType() != InventoryType.BREWING) {
-
+        if (event.getClickedInventory() == null) {
+            return;
+        } else if (event.getInventory().getType() == InventoryType.BREWING && event.getClickedInventory().getType() != InventoryType.BREWING) {
             ItemStack item = event.getCurrentItem();
+            if (item == null) {
+                return;
+            }
             if ((item.getType() == Material.POTION || item.getType() == Material.SPLASH_POTION || item.getType() == Material.LINGERING_POTION)) {
                 BrewerInventory brewingStand = (BrewerInventory) event.getInventory();
                 if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
@@ -662,6 +665,7 @@ public class main extends JavaPlugin implements Listener {
 
                     // Prevents increasing stacks of potions in the brewing stand when shift-clicking single item.
                     if (item.getAmount() == 1) {
+                        // TODO handle shift clicking stack from hotbar -> inventory, or inventory -> hotbar
                         cancel = true;
                     }
 
@@ -705,24 +709,6 @@ public class main extends JavaPlugin implements Listener {
             default:
                 break;
         }
-    }
-
-    // PLAYERS SHIFT CLICKING INTO BREWING STANDS
-    @EventHandler
-    public void onShiftClick(InventoryMoveItemEvent event) {
-        if (event.getDestination().getType() != InventoryType.BREWING) {
-            return;
-        }
-        ItemStack sending = event.getItem();
-        if (sending.getType() == Material.POTION || sending.getType() == Material.SPLASH_POTION) {
-            this.log.info(String.valueOf(event.getDestination().getSize()));
-            for (ItemStack item : event.getDestination().getContents()) {
-                this.log.info(item.getType().name());
-            }
-
-        }
-        return;
-
     }
 
     // STACK SIZES IN THE WORLD
