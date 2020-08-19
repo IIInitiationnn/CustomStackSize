@@ -1,4 +1,6 @@
 # CustomStacksize
+[Releases](https://github.com/IIInitiationnn/CustomStackSize/releases)
+
 A Bukkit plugin to modify maximum stack sizes of items.
 
 ### Compatibility

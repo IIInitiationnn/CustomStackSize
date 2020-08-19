@@ -1,6 +1,6 @@
 package customstacksize;
 
-import net.minecraft.server.v1_16_R1.*;
+import net.minecraft.server.v1_16_R1.*; // need to make adaptable
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -42,18 +42,18 @@ public class main extends JavaPlugin implements Listener {
         this.log.info("Initialising CustomStackSize and validating stack sizes.");
         this.saveDefaultConfig();
         this.getServer().getPluginManager().registerEvents(this, this);
+        this.setupAllStackSizes();
         this.getCommand("customstacksize").setExecutor(new commands(this));
         this.getCommand("customstacksize").setTabCompleter(new tabcomplete(this));
-        this.setupAllStackSizes();
     }
 
     // RELOAD
     public void reload() {
-        this.getCommand("customstacksize").setExecutor(new commands(this));
-        this.getCommand("customstacksize").setTabCompleter(new tabcomplete(this));
         this.resetAllStackSizes();
         this.reloadConfig();
         this.setupAllStackSizes();
+        this.getCommand("customstacksize").setExecutor(new commands(this));
+        this.getCommand("customstacksize").setTabCompleter(new tabcomplete(this));
     }
 
     // STOP
