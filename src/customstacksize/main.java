@@ -63,7 +63,16 @@ public class main extends JavaPlugin implements Listener {
         this.log.info("CustomStackSize has been disabled.");
     }
 
-    // SET UP STACK SIZES ON SERVER
+    // DISPLAY PERMISSION DENIED TO CONSOLE
+    public void permissionDenied(CommandSender sender) {
+        this.log.info(ChatColor.RED + "" + sender.getName() + ChatColor.DARK_RED + " was denied access to command.");
+    }
+
+    /*******************************************************************************************************************
+    *                                               STACK SIZE MANAGEMENT                                              *
+    *******************************************************************************************************************/
+
+    // Set up all stack sizes in server memory.
     private void setupAllStackSizes() {
         Set<String> items;
         try {
@@ -108,7 +117,7 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
-    // SET UP STACK SIZE FOR ITEM ON SERVER
+    // Set up stack size for single item on server.
     private void setupStackSize(Material material, Item item, int stackSize) {
         try {
             // Put original stack size into the map containing original stack size values.
@@ -137,7 +146,7 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
-    // WIPE ALL STACK SIZES FROM MEMORY ON SERVER
+    // Wipe all stack sizes from server memory.
     private void resetAllStackSizes() {
         this.log.info("Wiping all custom stack sizes from memory.");
         Set<String> items;
@@ -168,7 +177,7 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
-    // WIPE STACK SIZE FOR ITEM ON SERVER
+    // Wipe stack size from server memory for single item.
     private int resetStackSize(Material material, Item item) {
         try {
             // Obtain original stack sizes and remove item from map.
@@ -190,12 +199,12 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
-    // DISPLAY PERMISSION DENIED TO CONSOLE
-    public void permissionDenied(CommandSender sender) {
-        this.log.info(ChatColor.RED + "" + sender.getName() + ChatColor.DARK_RED + " was denied access to command.");
-    }
+    /*******************************************************************************************************************
+    *                                                     COMMANDS                                                     *
+    *******************************************************************************************************************/
 
-    // DISPLAY CUSTOM STACK SIZE OF ITEM: COMMAND "DISPLAY <ITEM>"
+    // Display custom stack size of item.
+    // "display <item>"
     public boolean display(CommandSender sender, String item) {
         Set<String> items;
         try {
@@ -229,7 +238,8 @@ public class main extends JavaPlugin implements Listener {
         return true;
     }
 
-    // DISPLAY LIST OF CUSTOM STACK SIZES: COMMAND "LIST"
+    // Display list of custom stack sizes.
+    // "list"
     public void list(CommandSender sender) {
 
         Set<String> items;
@@ -269,7 +279,8 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
-    // MODIFY ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "SET <ITEM> <SIZE>"
+    // Modify item's stack size in config and load.
+    // "set <item> <size>"
     public boolean setStackCommand(CommandSender sender, String itemName, String size) {
         int newSize;
         try {
@@ -316,11 +327,11 @@ public class main extends JavaPlugin implements Listener {
             case "all_pressure_plate":
                 return setBulkWooden(sender, itemName.replaceAll("all_", ""), size);
             default:
-                return executeSet(sender, itemName.toUpperCase(), newSize);
+                return setNonBulk(sender, itemName.toUpperCase(), newSize);
         }
     }
 
-    // SET COLLECTION OF COLOURED ITEMS TO THE SAME STACK SIZE
+    // Set collection of coloured items to the same stack size.
     public boolean setBulkColoured(CommandSender sender, String category, String size) {
         String[] colours = {"red", "lime", "pink", "blue", "cyan", "gray", "white", "black", "brown", "green", "orange", "purple", "yellow", "magenta", "light_blue", "light_gray"};
         int newSize;
@@ -337,23 +348,23 @@ public class main extends JavaPlugin implements Listener {
 
         for (String colour : colours) {
             String itemName = category.equalsIgnoreCase("glass") || category.equalsIgnoreCase("glass_pane") ? (colour + "_stained_" + category).toUpperCase() : (colour + "_" + category).toUpperCase();
-            executeSet(sender, itemName, newSize);
+            setNonBulk(sender, itemName, newSize);
         }
 
         if (category.equalsIgnoreCase("glass")) {
-            executeSet(sender, "GLASS", newSize);
+            setNonBulk(sender, "GLASS", newSize);
         } else if (category.equalsIgnoreCase("glass_pane")) {
-            executeSet(sender, "GLASS_PANE", newSize);
+            setNonBulk(sender, "GLASS_PANE", newSize);
         } else if (category.equalsIgnoreCase("terracotta")) {
-            executeSet(sender, "TERRACOTTA", newSize);
+            setNonBulk(sender, "TERRACOTTA", newSize);
         } else if (category.equalsIgnoreCase("shulker_box")) {
-            executeSet(sender, "SHULKER_BOX", newSize);
+            setNonBulk(sender, "SHULKER_BOX", newSize);
         }
 
         return false;
     }
 
-    // SET COLLECTION OF WOODEN ITEMS TO THE SAME STACK SIZE
+    // Set collection of wooden items to the same stack size.
     public boolean setBulkWooden(CommandSender sender, String category, String size) {
         String[] woods = {"oak", "birch", "acacia", "spruce", "jungle", "dark_oak"};
         String[] fungi = {"warped", "crimson"};
@@ -426,14 +437,14 @@ public class main extends JavaPlugin implements Listener {
         }
 
         for (String item : items) {
-            executeSet(sender, item, newSize);
+            setNonBulk(sender, item, newSize);
         }
 
         return false;
     }
 
-    // EXECUTING THE SET COMMAND
-    public boolean executeSet(CommandSender sender, String itemName, int newSize) {
+    // Set single item to stack size.
+    public boolean setNonBulk(CommandSender sender, String itemName, int newSize) {
         Material material = Material.matchMaterial(itemName);
         Item item;
         try {
@@ -465,7 +476,8 @@ public class main extends JavaPlugin implements Listener {
         return false;
     }
 
-    // RESET ITEM'S STACK SIZE IN CONFIG AND LOAD: COMMAND "RESET <ITEM>"
+    // Reset item's stack size in config and load.
+    // "reset <item>"
     public boolean resetStackCommand(CommandSender sender, String itemName) {
         Material material = Material.matchMaterial(itemName);
         Item item;
@@ -496,7 +508,11 @@ public class main extends JavaPlugin implements Listener {
         return false;
     }
 
-    // PLAYERS EMPTYING BUCKETS
+
+    /*******************************************************************************************************************
+    *                                                      EVENTS                                                      *
+    *******************************************************************************************************************/
+    // Players emptying buckets.
     @EventHandler
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
         if (event.getPlayer().getGameMode().equals(GameMode.valueOf("CREATIVE"))) {
@@ -553,7 +569,7 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
-    // PLAYERS DRINKING MILK OR STEWS
+    // Players drinking milk or stews.
     @EventHandler
     public void onPlayerConsumeFood(PlayerItemConsumeEvent event) {
         boolean isFoodItem = true;
@@ -648,7 +664,7 @@ public class main extends JavaPlugin implements Listener {
 
     }
 
-    // PLAYERS MANIPULATING INVENTORY
+    // Players manipulating inventories.
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getClickedInventory() == null) {
@@ -711,7 +727,7 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
-    // STACK SIZES IN THE WORLD
+    // Item stacks being dropped in the world.
     @EventHandler
     public void onBlockDrop(BlockDropItemEvent event) {
         List<org.bukkit.entity.Item> droppedItems = event.getItems();
